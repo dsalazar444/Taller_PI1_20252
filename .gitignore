@@ -1,2 +1,4 @@
 *.pyc
 .vscode/
+# Ignoramos todos los archivos con extensión .env
+*.env 

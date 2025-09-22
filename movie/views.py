@@ -4,7 +4,9 @@ from .models import Movie
 import matplotlib.pyplot as plt
 import matplotlib 
 import io
+import numpy as np
 import urllib, base64
+from movie.utils import get_embedding, cosine_similarity
 
 # Create your views here.
 
@@ -17,6 +19,29 @@ def home(request):
     else:
         movies = Movie.objects.all()
     return render(request, 'home.html', {'searchTerm':searchTerm,'movies': movies})
+
+def recommendations(request):
+    #Obtenemos input
+    prompt = request.GET.get('searchMovieRecommendations')
+    # Si no hay prompt (página cargada por primera vez), no llamamos a la API
+    if not prompt or not prompt.strip():
+        # mostrar la plantilla para que el usuario escriba en el cajón
+        return render(request, 'recommendations.html', {'movies': [], 'searchTerm': 'None'})
+   
+    #Si sí tenemos prompt (clickearon Buscar), Obtenemos el emb del input
+    emb_prompt = get_embedding(prompt)
+    movies = Movie.objects.all()
+    result=[]
+    for movie in movies:
+        #Convertimos la lista emb a np.array
+        emb_movie = np.array(movie.emb)
+        cosine = cosine_similarity(emb_prompt, emb_movie)
+        #Si la similitud es mayor a 0.7, mostramos pelicula
+        if (cosine > 0.5):
+            result.append(movie)
+    
+    return render(request, 'recommendations.html',{'movies':result,'searchTerm':prompt})
+
 
 
 def about(request):

@@ -4,6 +4,7 @@ from django.core.management.base import BaseCommand
 from movie.models import Movie
 from openai import OpenAI
 from dotenv import load_dotenv
+from movie.utils import get_embedding, cosine_similarity
 
 class Command(BaseCommand):
     help = "Compare two movies and optionally a prompt using OpenAI embeddings"
@@ -16,16 +17,6 @@ class Command(BaseCommand):
         # ✅ Change these titles for any movies you want to compare
         movie1 = Movie.objects.get(title="The House of the Devil")
         movie2 = Movie.objects.get(title="The Sea")
-
-        def get_embedding(text):
-            response = client.embeddings.create(
-                input=[text],
-                model="text-embedding-3-small"
-            )
-            return np.array(response.data[0].embedding, dtype=np.float32)
-
-        def cosine_similarity(a, b):
-            return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
 
         # ✅ Generate embeddings of both movies
         emb1 = get_embedding(movie1.description)

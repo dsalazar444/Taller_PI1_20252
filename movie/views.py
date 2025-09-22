@@ -29,19 +29,24 @@ def recommendations(request):
         return render(request, 'recommendations.html', {'movies': [], 'searchTerm': 'None'})
    
     #Si sí tenemos prompt (clickearon Buscar), Obtenemos el emb del input
-    emb_prompt = get_embedding(prompt)
-    movies = Movie.objects.all()
-    result=[]
-    for movie in movies:
-        #Convertimos la lista emb a np.array
-        emb_movie = np.array(movie.emb)
-        cosine = cosine_similarity(emb_prompt, emb_movie)
-        #Si la similitud es mayor a 0.7, mostramos pelicula
-        if (cosine > 0.5):
-            result.append(movie)
     
-    return render(request, 'recommendations.html',{'movies':result,'searchTerm':prompt})
+    # Generar embedding del prompt
+    prompt_emb = get_embedding(prompt)
 
+    # Recorrer la base de datos y comparar
+    best_movie = None
+    max_similarity = -1
+
+    for movie in Movie.objects.all():
+        movie_emb = np.frombuffer(movie.emb, dtype=np.float32)
+        similarity = cosine_similarity(prompt_emb, movie_emb)
+
+        if similarity > max_similarity:
+            max_similarity = similarity
+            best_movie = movie
+
+    #print(f"La película más similar al prompt es: {best_movie.title} con similitud {max_similarity:.4f}")
+    return render(request, 'recommendations.html',{'movie':best_movie,'searchTerm':prompt,'max_similarity':f"{max_similarity:.4f}"})
 
 
 def about(request):

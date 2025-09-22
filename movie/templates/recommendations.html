@@ -20,9 +20,9 @@
     <!-- Con v-for reprenstamos una lista de elementos basada en un array.
     Como el div está dentro de un for, indicamos que cada elemento obtenido
     se le aplica ese diseño -->
-        {% if searchTerm %}
+        {% if searchTerm  and searchTerm != "None" %}
             <div class="col">
-                <p>La película más similar al prompt es: {{movie.title}} con similitud {{max_similarity}}")</p>
+                <p>La película más similar al prompt es: {{movie.title}} con similitud {{max_similarity}}</p>
                 <div class="card">
                     <img src="{{ movie.image.url }}" class="card-img-top" alt="...">
                     <div class="card-body">
